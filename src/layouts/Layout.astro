@@ -1,0 +1,143 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+
+const { frontmatter } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{frontmatter?.title || "Wedding Festival"}</title>
+  </head>
+
+  <script>
+    const colorSelected = "text-green-700";
+    const colorDefault = "text-zinc-400";
+
+    function detectLanguage() {
+      const saved = localStorage.getItem("lang");
+      if (saved) return saved;
+
+      const langs = navigator.languages || [navigator.language];
+
+      for (const l of langs) {
+        if (l.startsWith("sk")) return "sk";
+        if (l.startsWith("cs") || l.startsWith("cz")) return "cz";
+      }
+
+      return "en";
+    }
+
+    function applyLanguage(lang) {
+
+      // update scenes
+      const scenes = document.querySelectorAll(".scene-img");
+
+      scenes.forEach(img => {
+        const sceneName = img.dataset.scene;
+        img.src = `/scenes/${lang}_${sceneName}.svg`;
+      });
+
+      // update button highlight
+      document.querySelectorAll(".lang-btn").forEach(btn => {
+
+        btn.classList.remove(colorSelected);
+        btn.classList.add(colorDefault);
+
+        if (btn.dataset.lang === lang) {
+          btn.classList.remove(colorDefault);
+          btn.classList.add(colorSelected);
+        }
+
+      });
+    }
+
+    const lang = detectLanguage();
+    applyLanguage(lang);
+
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+
+      btn.addEventListener("click", () => {
+
+        const lang = btn.dataset.lang;
+
+        localStorage.setItem("lang", lang);
+
+        applyLanguage(lang);
+
+      });
+
+    });
+  </script>
+
+  <body class="min-h-screen flex flex-col">
+
+<!-- <header class="h-16 border-b flex items-center justify-center">
+Header
+</header> -->
+
+    <!-- Header -->
+    <header class="h-16 flex items-center justify-center px-6 border-b border-white">     
+
+      <!-- <h1 class="text-lg"></h1> -->
+
+      <!-- Scene navigation -->
+      <!-- <div class="flex gap-4">
+        <button id="prev-scene" class="px-3 py-1 bg-zinc-700 rounded hover:bg-zinc-600">
+          ←
+        </button>
+
+        <button id="next-scene" class="px-3 py-1 bg-zinc-700 rounded hover:bg-zinc-600">
+          →
+        </button>
+      </div> -->
+
+      <!-- Language switcher -->
+      <div class="flex gap-3 text-sm">
+        <button data-lang="en" class="lang-btn px-2 py-1 text-zinc-400 hover:text-fuchsia-950">EN</button>
+        <button data-lang="cz" class="lang-btn px-2 py-1 text-zinc-400 hover:text-fuchsia-950">CZ</button>
+        <button data-lang="sk" class="lang-btn px-2 py-1 text-zinc-400 hover:text-fuchsia-950">SK</button>
+      </div>
+
+    </header>
+
+<!-- <main class="flex-1 flex items-center justify-center overflow-hidden"> -->
+ <!-- <main class="flex-1 flex items-center justify-center overflow-hidden p-4"></main> -->
+<main class="flex-1 overflow-y-auto">
+  <slot />
+  <!-- <img
+    src="/scenes/scene.svg"
+    class="h-full max-h-full w-auto"
+  /> -->
+
+</main>
+
+<!-- <footer class="h-16 border-t flex items-center justify-center">
+Footer
+</footer> -->
+
+    <!-- Footer -->
+    <footer class="h-16 flex items-center justify-center border-t border-zinc-700">
+      <p class="text-sm">© 2026</p>
+    </footer>
+
+</body>
+
+
+
+  <!-- <body class="min-h-screen flex flex-col">
+  <body class="min-h-screen flex flex-col bg-white text-black">
+
+    <Header />
+
+    <main class="flex flex-1 justify-center overflow-hidden">
+      <slot />
+    </main>
+
+    <Footer />
+
+  </body> -->
+</html>
