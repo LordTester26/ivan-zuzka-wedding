@@ -1,0 +1,18 @@
+---
+const scene = Astro.props.scene ?? "info";
+---
+
+<img
+  data-scene={scene}
+  src={`/scenes/en_${scene}.svg`}
+  alt={`Scene: ${scene}`}
+  class="
+    scene-img 
+    
+    w-auto 
+    lg:max-w-lg
+    
+    h-auto
+    max-h-3/1
+  "
+/>
