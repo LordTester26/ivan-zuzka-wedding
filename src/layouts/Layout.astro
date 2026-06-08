@@ -1,7 +1,7 @@
 ---
+import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import "../styles/global.css";
 
 const { frontmatter } = Astro.props;
 ---
@@ -18,6 +18,14 @@ const { frontmatter } = Astro.props;
     const colorDefault = "text-zinc-400";
     const fontSelected = "font-medium";
     const fontDefault = "font-normal";
+    const sceneSetSelectedBorder = "border-green-700";
+    const sceneSetDefaultBorder = "border-zinc-300";
+
+    function detectSceneSet() {
+      const saved = localStorage.getItem("sceneSet");
+      if (saved === "invitation" || saved === "information") return saved;
+      return "information";
+    }
 
     function detectLanguage() {
       const saved = localStorage.getItem("lang");
@@ -33,10 +41,36 @@ const { frontmatter } = Astro.props;
       return "en";
     }
 
-    function applyLanguage(lang) {
+    function applySceneSet(sceneSet: "invitation" | "information") {
+
+      document.querySelectorAll<HTMLElement>("[data-scene-set-group]").forEach(group => {
+        const isSelected = group.dataset.sceneSetGroup === sceneSet;
+        group.classList.toggle("hidden", !isSelected);
+      });
+
+      const langContainer = document.querySelector<HTMLElement>(".lang-switcher");
+      if (langContainer) {
+        langContainer.classList.toggle("hidden", sceneSet === "information");
+      }
+
+      document.querySelectorAll<HTMLButtonElement>(".scene-set-btn").forEach(btn => {
+
+        btn.classList.remove(colorSelected, fontSelected, sceneSetSelectedBorder);
+        btn.classList.add(colorDefault, fontDefault, sceneSetDefaultBorder);
+
+        if (btn.dataset.sceneSet === sceneSet) {
+          btn.classList.remove(colorDefault, fontDefault, sceneSetDefaultBorder);
+          btn.classList.add(colorSelected, fontSelected, sceneSetSelectedBorder);
+        }
+
+      });
+
+    }
+
+    function applyLanguage(lang: string) {
 
       // update scenes
-      const scenes = document.querySelectorAll(".scene-img");
+      const scenes = document.querySelectorAll<HTMLImageElement>(".scene-img");
 
       scenes.forEach(img => {
         const sceneName = img.dataset.scene;
@@ -44,7 +78,7 @@ const { frontmatter } = Astro.props;
       });
 
       // update button highlight
-      document.querySelectorAll(".lang-btn").forEach(btn => {
+      document.querySelectorAll<HTMLButtonElement>(".lang-btn").forEach(btn => {
 
         btn.classList.remove(colorSelected, fontSelected);
         btn.classList.add(colorDefault, fontDefault);
@@ -57,18 +91,40 @@ const { frontmatter } = Astro.props;
       });
     }
 
-    const lang = detectLanguage();
-    applyLanguage(lang);
+    document.addEventListener("DOMContentLoaded", () => {
 
-    document.querySelectorAll(".lang-btn").forEach(btn => {
+      const lang = detectLanguage();
+      applyLanguage(lang);
 
-      btn.addEventListener("click", () => {
+      const sceneSet = detectSceneSet();
+      applySceneSet(sceneSet);
 
-        const lang = btn.dataset.lang;
+      document.querySelectorAll<HTMLButtonElement>(".lang-btn").forEach(btn => {
 
-        localStorage.setItem("lang", lang);
+        btn.addEventListener("click", () => {
 
-        applyLanguage(lang);
+          const lang = btn.dataset.lang;
+          if (!lang) return;
+
+          localStorage.setItem("lang", lang);
+
+          applyLanguage(lang);
+
+        });
+
+      });
+
+      document.querySelectorAll<HTMLButtonElement>(".scene-set-btn").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+          const sceneSet = btn.dataset.sceneSet as "invitation" | "information";
+
+          localStorage.setItem("sceneSet", sceneSet);
+
+          applySceneSet(sceneSet);
+
+        });
 
       });
 
